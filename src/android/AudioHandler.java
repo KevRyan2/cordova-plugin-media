@@ -273,6 +273,9 @@ public class AudioHandler extends CordovaPlugin {
         if (players.isEmpty()) {
             onLastPlayerReleased();
         }
+        AudioManager am = (AudioManager) this.cordova.getActivity().getSystemService(Context.AUDIO_SERVICE);
+        int result = am.abandonAudioFocus(focusChangeListener);
+
         audio.destroy();
         return true;
     }
