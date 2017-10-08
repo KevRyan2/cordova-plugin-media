@@ -345,13 +345,51 @@
             if ([self hasAudioSession]) {
                 NSError* __autoreleasing err = nil;
                 NSNumber* playAudioWhenScreenIsLocked = [options objectForKey:@"playAudioWhenScreenIsLocked"];
+                NSString *audioSessionOpts            = [options objectForKey:@"audioSessionOpts"];
+                NSString *usePreviousAudioOpts        = [options objectForKey:@"usePreviousAudioOpts"];
+
+                NSLog(@"Audio session opts!! %@", audioSessionOpts);
                 BOOL bPlayAudioWhenScreenIsLocked = YES;
                 if (playAudioWhenScreenIsLocked != nil) {
                     bPlayAudioWhenScreenIsLocked = [playAudioWhenScreenIsLocked boolValue];
                 }
 
                 NSString* sessionCategory = bPlayAudioWhenScreenIsLocked ? AVAudioSessionCategoryPlayback : AVAudioSessionCategorySoloAmbient;
-                [self.avSession setCategory:sessionCategory error:&err];
+                AVAudioSessionCategoryOptions sessionOpt;
+                if(audioSessionOpts) {
+                    if([audioSessionOpts isEqualToString:@"AVAudioSessionCategoryOptionMixWithOthers"]) {
+                        sessionOpt = AVAudioSessionCategoryOptionMixWithOthers;
+                    } else if ([audioSessionOpts isEqualToString:@"AVAudioSessionCategoryOptionDuckOthers"]) {
+                        sessionOpt = AVAudioSessionCategoryOptionDuckOthers;
+                    } else if ([audioSessionOpts isEqualToString:@"AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers"]) {
+                        sessionOpt = AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
+                    } else if ([audioSessionOpts isEqualToString:@"AVAudioSessionCategoryOptionAllowBluetoothA2DP"]) {
+                        sessionOpt = AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+                    } else if ([audioSessionOpts isEqualToString:@"AVAudioSessionCategoryOptionAllowBluetooth"]) {
+                        sessionOpt = AVAudioSessionCategoryOptionAllowBluetooth;
+                    } else if ([audioSessionOpts isEqualToString:@"AVAudioSessionCategoryOptionAllowAirPlay"]) {
+                        sessionOpt = AVAudioSessionCategoryOptionAllowAirPlay;
+                    } else if ([audioSessionOpts isEqualToString:@"AVAudioSessionCategoryOptionDefaultToSpeaker"]) {
+                        sessionOpt = AVAudioSessionCategoryOptionDefaultToSpeaker;
+                    }
+                }
+                NSLog(@"Use previous audio opts? %@", usePreviousAudioOpts);
+                if(audioSessionOpts) {
+                    NSLog(@"Setting av session to category: %@ with options: %@", sessionCategory, audioSessionOpts);
+                    [self.avSession
+                     setCategory:sessionCategory
+                     withOptions:sessionOpt
+                     error:&err];
+                } else if(!usePreviousAudioOpts)  {
+                    NSLog(@"No flag set for previous audio opts... set to playback category");
+                    [self.avSession
+                     setCategory:sessionCategory
+                     error:&err];
+                } else {
+                    NSLog(@"Flag set for previous audio opts... do nothing");
+                }
+                
+                
                 if (![self.avSession setActive:YES error:&err]) {
                     // other audio with higher priority that does not allow mixing could cause this to fail
                     NSLog(@"Unable to play audio: %@", [err localizedFailureReason]);
