@@ -374,13 +374,13 @@
                     }
                 }
                 NSLog(@"Use previous audio opts? %@", usePreviousAudioOpts);
-                if(audioSessionOpts) {
+                if(audioSessionOpts && !usePreviousAudioOpts) {
                     NSLog(@"Setting av session to category: %@ with options: %@", sessionCategory, audioSessionOpts);
                     [self.avSession
                      setCategory:sessionCategory
                      withOptions:sessionOpt
                      error:&err];
-                } else if(!usePreviousAudioOpts)  {
+                } else if(!audioSessionOpts)  {
                     NSLog(@"No flag set for previous audio opts... set to playback category");
                     [self.avSession
                      setCategory:sessionCategory
