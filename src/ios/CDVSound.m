@@ -384,6 +384,7 @@
                     NSLog(@"No flag set for previous audio opts... set to playback category");
                     [self.avSession
                      setCategory:sessionCategory
+                     withOptions:0
                      error:&err];
                 } else {
                     NSLog(@"Flag set for previous audio opts... do nothing");
